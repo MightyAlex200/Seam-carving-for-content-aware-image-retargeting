@@ -55,14 +55,16 @@ Mat remove_seam(int* seam, Mat image, bool vertical) {
 
     Mat rMat = *new Mat();
 
+    rMat = image;
+
     for(int alt_axis = 0; alt_axis < alt_axis_length; alt_axis++) {
         for(int main_axis = seam[alt_axis]; main_axis < main_axis_length-1; main_axis++) {
             Vec3b& from_pixel = vertical ?
-                image.at<Vec3b>(Point(alt_axis, main_axis)) :
-                image.at<Vec3b>(Point(main_axis, alt_axis));
+                rMat.at<Vec3b>(Point(alt_axis, main_axis)) :
+                rMat.at<Vec3b>(Point(main_axis, alt_axis));
             Vec3b& to_pixel = vertical ?
-                image.at<Vec3b>(Point(alt_axis, main_axis+1)) :
-                image.at<Vec3b>(Point(main_axis+1, alt_axis));
+                rMat.at<Vec3b>(Point(alt_axis, main_axis+1)) :
+                rMat.at<Vec3b>(Point(main_axis+1, alt_axis));
             from_pixel = to_pixel;
         }
     }
