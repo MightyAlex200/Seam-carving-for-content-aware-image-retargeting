@@ -48,3 +48,27 @@ int* get_seam(Mat importance_map, bool vertical) {
 
     return r_coords;
 }
+
+Mat remove_seam(int* seam, Mat image, bool vertical) {
+    const int main_axis_length = vertical ? image.rows : image.cols;
+    const int alt_axis_length  = vertical ? image.cols : image.rows;
+
+    Mat rMat = *new Mat();
+
+    for(int alt_axis = 0; alt_axis < alt_axis_length; alt_axis++) {
+        for(int main_axis = seam[alt_axis]; main_axis < main_axis_length-1; main_axis++) {
+            Vec3b& from_pixel = vertical ?
+                image.at<Vec3b>(Point(alt_axis, main_axis)) :
+                image.at<Vec3b>(Point(main_axis, alt_axis));
+            Vec3b& to_pixel = vertical ?
+                image.at<Vec3b>(Point(alt_axis, main_axis+1)) :
+                image.at<Vec3b>(Point(main_axis+1, alt_axis));
+            from_pixel = to_pixel;
+        }
+    }
+
+    Rect crop_rectangle(0, 0, image.cols-!vertical, image.rows-vertical);
+    rMat = image(crop_rectangle);
+    
+    return rMat;
+}

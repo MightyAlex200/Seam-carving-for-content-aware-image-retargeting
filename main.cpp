@@ -37,19 +37,17 @@ int main(int argc, char** argv) {
         Mat image_map = sobel(image);
 
         if(remove) {
-            for(int x = 0; x < image.cols; x++) {
-                for(int y = seam[x]; y < image.rows-1; y++) {
-                    Vec3b& from_pixel = image.at<Vec3b>(Point(x, y));
-                    Vec3b& to_pixel   = image.at<Vec3b>(Point(x, y+1));
-                    from_pixel = to_pixel;
-                }
-            }
-            Rect crop_rectangle(0, 0, image.cols, image.rows-1);
-            image = image(crop_rectangle);
+            image = remove_seam(seam, image, vertical);
         } else {
-            seam = get_seam(image_map, true);
-            for(int x = 0; x < image.cols; x++) {
-                Vec3b& from_pixel = image.at<Vec3b>(Point(x, seam[x]));
+            seam = get_seam(image_map, vertical);
+            
+            const int main_axis_length = vertical ? image.rows : image.cols;
+            const int alt_axis_length  = vertical ? image.cols : image.rows;
+
+            for(int alt_axis = 0; alt_axis < alt_axis_length; alt_axis++) {
+                Vec3b& from_pixel = vertical ? 
+                    image.at<Vec3b>(Point(alt_axis, seam[alt_axis])) :
+                    image.at<Vec3b>(Point(seam[alt_axis], alt_axis));
                 from_pixel[2] = 255;
                 from_pixel[1] = 0;
                 from_pixel[0] = 0;
