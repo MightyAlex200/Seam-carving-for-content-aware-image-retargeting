@@ -74,3 +74,35 @@ Mat remove_seam(int* seam, Mat image, bool vertical) {
     
     return rMat;
 }
+
+Mat insert_seam(int* seam, Mat image, bool vertical) {
+    const int main_axis_length = vertical ? image.rows : image.cols;
+    const int alt_axis_length  = vertical ? image.cols : image.rows;
+
+    Mat rMat = *new Mat();
+
+    copyMakeBorder(image, rMat, 0, vertical, 0, !vertical, BORDER_CONSTANT, 0);
+
+    for(int alt_axis = 0; alt_axis < alt_axis_length; alt_axis++) {
+        for(int main_axis = main_axis_length-1; main_axis >= seam[alt_axis]; main_axis--) {
+            Vec3b& current_pixel = vertical ?
+                rMat.at<Vec3b>(Point(alt_axis, main_axis)) :
+                rMat.at<Vec3b>(Point(main_axis, alt_axis));
+            Vec3b& next_pixel = vertical ?
+                rMat.at<Vec3b>(Point(alt_axis, main_axis+1)) :
+                rMat.at<Vec3b>(Point(main_axis+1, alt_axis));
+            if(main_axis == seam[alt_axis]) {
+                Vec3b& prev_pixel = vertical ?
+                    rMat.at<Vec3b>(Point(alt_axis, main_axis-1)) :
+                    rMat.at<Vec3b>(Point(main_axis-1, alt_axis));
+                current_pixel[2] = (prev_pixel[2] + next_pixel[2]) / 2;
+                current_pixel[1] = (prev_pixel[1] + next_pixel[1]) / 2;
+                current_pixel[0] = (prev_pixel[0] + next_pixel[0]) / 2;
+            } else {
+                next_pixel = current_pixel;
+            }
+        }
+    }
+    
+    return rMat;
+}
